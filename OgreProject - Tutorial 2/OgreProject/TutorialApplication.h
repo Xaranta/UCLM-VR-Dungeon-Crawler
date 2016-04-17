@@ -31,6 +31,23 @@ protected:
 	virtual void createCamera(void);
 	virtual void createViewports(void);
 
+	virtual bool frameRenderingQueued(const Ogre::FrameEvent& fe);
+	
+	//------------------------------------------------------------------
+	//------------------------------------------------------------------
+	//Buffered Input
+	virtual bool keyPressed(const OIS::KeyEvent& ke);
+	virtual bool keyReleased(const OIS::KeyEvent& ke);
+	virtual bool mouseMoved(const OIS::MouseEvent& me);
+	virtual bool mousePressed(const OIS::MouseEvent& me, OIS::MouseButtonID id);
+	virtual bool mouseReleased(const OIS::MouseEvent& me, OIS::MouseButtonID id);
+	//------------------------------------------------------------------
+	//------------------------------------------------------------------
+	//Buffered input variables?
+	Ogre::Real mRotate;
+	Ogre::Real mMove;
+	Ogre::SceneNode* mNode;
+	Ogre::Vector3 mDirection;
 
 };
  
