@@ -48,7 +48,7 @@ void TutorialApplication::createViewports(void)
 {
     // Create one viewport, entire window
     Ogre::Viewport* vp = mWindow->addViewport(mCamera);
-    vp->setBackgroundColour(Ogre::ColourValue(0,0,0));
+    vp->setBackgroundColour(Ogre::ColourValue(0,0,1));
     // Alter the camera aspect ratio to match the viewport
     mCamera->setAspectRatio(Ogre::Real(vp->getActualWidth()) / Ogre::Real(vp->getActualHeight()));    
 }
@@ -79,11 +79,18 @@ void TutorialApplication::createScene(void)
     mSceneMgr->setAmbientLight(Ogre::ColourValue(0.5, 0,5, 0.5));
     mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
  
-    Ogre::Entity* entNinja = mSceneMgr->createEntity("Zach", "rdmobj00.mesh");
+	Ogre::Entity* entZack = mSceneMgr->createEntity("Zack", "rdmobj00.mesh");
+    entZack->setCastShadows(true);
+
+	Ogre::SceneNode* node2 = mSceneMgr->getRootSceneNode()->createChildSceneNode("ZackNode");
+	node2->attachObject(entZack);
+
+    Ogre::Entity* entNinja = mSceneMgr->createEntity("Ninja", "ninja.mesh");
     entNinja->setCastShadows(true);
 
 	Ogre::SceneNode* node = mSceneMgr->getRootSceneNode()->createChildSceneNode("NinjaNode");
 	node->attachObject(entNinja);
+
 
     Ogre::Plane plane(Ogre::Vector3::UNIT_Y, 0);
  
@@ -112,7 +119,116 @@ void TutorialApplication::createScene(void)
 	mNode = node;
 
 	node->attachObject(mCamera);
+
+	//----------------------------------------------------------------------
+	//------------------------------------------------------------------------
+	//Jamming in all the animation stuff
+	// Setup animation defaults
+	Ogre::Animation::setDefaultInterpolationMode(Ogre::Animation::IM_LINEAR);
+	Ogre::Animation::setDefaultRotationInterpolationMode(Ogre::Animation::RIM_LINEAR);
+ 
+		// Create entity (Loads mesh and associated animations, if it is first reference to mesh)
+		Ogre::Entity *ent = mSceneMgr->createEntity("jaiquaent", "jaiqua.mesh");
+ 
+		// Create a scene node and add the entity to it
+		Ogre::SceneNode *mCharSceneNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+		mCharSceneNode->attachObject(ent);
+		//mCharSceneNode->pitch(Ogre::Degree(90));
+		//mCharSceneNode->yaw(Ogre::Degree(-128));
+		//mCharSceneNode->setPosition(-152, 38, 33);
+		mCharSceneNode->setScale(5,5,5);
+ 
+		// Gets an animation state for the animation "sneak" for the created entity, and sets it up
+                // (mCharAnimState must be accessible in the frame listener
+		mCharAnimState = ent->getAnimationState("Sneak");
+		mCharAnimState->setEnabled(true);
+		mCharAnimState->setLoop(true);
+
+ 
+
+	// Ogre Tutorial 4: Animation in Ogre http://paginas.fe.up.pt/-----------
+
+	//In the CreateScene method
+	//Create a Light
+	
+	 Ogre::Light * alight = mSceneMgr->createLight("AnimLight");
+ 
+		alight->setType(Ogre::Light::LT_SPOTLIGHT);
+		alight->setDiffuseColour(Ogre::ColourValue(0.25f,0.25f,0.0f));
+		alight->setSpecularColour(Ogre::ColourValue(0.25f,0.25f,0.0f));
+		alight->setAttenuation(8000,1,0.0005,0);
+		alight->setSpotlightRange(Ogre::Degree(60), Ogre::Degree(70));
+		alight->setDirection(Ogre::Vector3::NEGATIVE_UNIT_Y);
+
+		//Create a geometry to represent the light (in this case a Billboard, for a simple and nice effect)
+		Ogre::BillboardSet* lightbillboardset = mSceneMgr->createBillboardSet("lightbbs", 1); //whats the number do?
+		lightbillboardset->setMaterialName("Examples/Flare");
+		Ogre::Billboard* lightbillboard = lightbillboardset->createBillboard(0,0,0,Ogre::ColourValue(0.5,0.3,0.0f));
+
+		//Create a SceneNode that will be holding the light and its representation
+		Ogre::SceneNode* lightNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("AnimLightNode");
+ 
+		lightNode->attachObject(alight);
+		lightNode->attachObject(lightbillboardset);
+ 
+		Ogre::Real x = 20, y = 20, z = 100;
+ 
+		lightNode->setPosition(x,y,z);
+		Ogre::Real s = 0.50f; //.05f and originally.
+		lightNode->setScale(s,s,s);
+
+		//Create an Animation associated to the scene node, with spline interpolation, and add a NodeAnimationTrack to it
+		Ogre::Real duration=4.0;
+		Ogre::Real step=duration/4.0;
+		Ogre::Animation* animation = mSceneMgr->createAnimation("LightAnim",duration);
+		animation->setInterpolationMode(Ogre::Animation::IM_SPLINE);
+		Ogre:: NodeAnimationTrack* track = animation->createNodeTrack(0,lightNode);
+
+		//Add five KeyFrame's to the track, corresponding to the cardinal points plus the repetition of the first
+		Ogre::TransformKeyFrame* key;
+ 
+		key = track->createNodeKeyFrame(0.0f);
+		key->setTranslate(Ogre::Vector3(-x, -y,z));
+		key->setScale(Ogre::Vector3(s,s,s));
+ 
+		key = track->createNodeKeyFrame(step);
+		key->setTranslate(Ogre::Vector3( -x, y,z));
+		key->setScale(Ogre::Vector3(s,s,s));
+ 
+		key = track->createNodeKeyFrame(2.0*step);
+		key ->setTranslate(Ogre::Vector3( x, y, z));
+		key->setScale(Ogre::Vector3(s,s,s));
+ 
+		key = track->createNodeKeyFrame(3.0*step);
+		key->setTranslate(Ogre::Vector3(x, -y, z));
+		key->setScale(Ogre::Vector3(s,s,s));
+ 
+		key = track->createNodeKeyFrame(4.0*step);
+		key->setTranslate(Ogre::Vector3(-x, -y,z));
+		key->setScale(Ogre::Vector3(s,s,s));
+		
+		//Still in CreateScene, create an AnimationState (it should be accessible by a frame listener that will update it)
+		// Declare it so that it is accessible in a frame listener (e.g. as an object you pass to the frame listener)
+		//Ogre::AnimationState * mLightAnimationState;
+		// ...
+		mLightAnimationState = mSceneMgr->createAnimationState("LightAnim");
+		mLightAnimationState->setEnabled(true);
+		mLightAnimationState->setLoop(true);
+		
+
+
 }
+
+//In a frame listener
+//Update the animation state in the frameStarted method
+bool TutorialApplication::frameStarted(const Ogre::FrameEvent& evt)
+    {
+		mCharAnimState->addTime(evt.timeSinceLastFrame);
+		mLightAnimationState->addTime(evt.timeSinceLastFrame);
+		
+      return true;
+    }
+
  bool TutorialApplication::frameRenderingQueued(const Ogre::FrameEvent& fe)
 {
   bool ret = BaseApplication::frameRenderingQueued(fe);
@@ -141,6 +257,12 @@ bool TutorialApplication::keyPressed(const OIS::KeyEvent& ke)
     mNode = mSceneMgr->getSceneNode("NinjaNode");
     mNode->attachObject(mCamera);
     break;
+	case OIS::KC_3:
+    mCamera->getParentSceneNode()->detachObject(mCamera);
+    mNode = mSceneMgr->getSceneNode("ZackNode");
+    mNode->attachObject(mCamera);
+    break;
+
  
   case OIS::KC_UP:
   case OIS::KC_W:

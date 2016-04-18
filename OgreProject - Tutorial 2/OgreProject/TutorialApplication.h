@@ -32,7 +32,7 @@ protected:
 	virtual void createViewports(void);
 
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent& fe);
-	
+	bool frameStarted(const Ogre::FrameEvent& evt);
 	//------------------------------------------------------------------
 	//------------------------------------------------------------------
 	//Buffered Input
@@ -48,7 +48,8 @@ protected:
 	Ogre::Real mMove;
 	Ogre::SceneNode* mNode;
 	Ogre::Vector3 mDirection;
-
+	Ogre::AnimationState * mLightAnimationState;
+	Ogre::AnimationState * mCharAnimState;
 };
  
 #endif // #ifndef __TutorialApplication_h_
